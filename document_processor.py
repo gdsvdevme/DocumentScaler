@@ -139,21 +139,45 @@ def resize_pdf_to_a5(input_file, output_file, margins, orientation='portrait'):
         logging.error(f"Error resizing PDF: {str(e)}")
         return False
 
-def create_pdf_from_text(text, output_file, title="", font_size=12, text_style="normal", margins=None, orientation='portrait'):
+def create_pdf_from_text(text, output_file, title="", font_size=12, text_style="normal", text_layout="single", margins=None, orientation='portrait'):
     """
     Create a PDF document from plain text
+    
+    text_layout options:
+    - 'single': Normal single column layout
+    - 'double': Two-column layout
     """
     try:
         # Set default margins if not provided
         if margins is None:
             margins = {'top': 0.5, 'right': 0.5, 'bottom': 0.5, 'left': 0.5}
         
-        # Determine page size based on orientation
-        if orientation == 'portrait':
-            page_size = A5
-        else:  # landscape
-            page_size = (A5_HEIGHT, A5_WIDTH)  # Swap width and height
+        # In two-column layout, we use A4 instead of A5 to accommodate two A5 columns side by side
+        if text_layout == "double":
+            # Use A4 for two-column layout
+            if orientation == 'portrait':
+                page_size = A4
+            else:  # landscape
+                page_size = (A4[1], A4[0])  # Swap width and height for landscape
+        else:
+            # For single column, use A5 as before
+            if orientation == 'portrait':
+                page_size = A5
+            else:  # landscape
+                page_size = (A5_HEIGHT, A5_WIDTH)  # Swap width and height
         
+        # Adjust margins for two-column layout if needed
+        if text_layout == "double":
+            # Smaller margins for columns
+            column_margins = {
+                'top': margins['top'],
+                'right': max(0.2, margins['right'] / 2),
+                'bottom': margins['bottom'],
+                'left': max(0.2, margins['left'] / 2)
+            }
+        else:
+            column_margins = margins
+            
         # Create a PDF document
         doc = SimpleDocTemplate(
             output_file,
@@ -183,31 +207,128 @@ def create_pdf_from_text(text, output_file, title="", font_size=12, text_style="
             leading=font_size * 1.2  # Line height
         )
         
-        # Create the content
-        story = []
+        # Create the title style
+        title_style = ParagraphStyle(
+            'Title',
+            parent=styles['Heading1'],
+            fontSize=font_size + 4,
+            alignment=TA_CENTER,
+            spaceAfter=font_size * 2
+        )
         
-        # Add title if provided
-        if title:
-            title_style = ParagraphStyle(
-                'Title',
-                parent=styles['Heading1'],
-                fontSize=font_size + 4,
-                alignment=TA_CENTER,
-                spaceAfter=font_size * 2
-            )
-            story.append(Paragraph(title, title_style))
-            story.append(Spacer(1, font_size * 0.5))
-        
-        # Split text into paragraphs and add to the story
+        # Split text into paragraphs
         paragraphs = text.split('\n\n')
-        for i, para in enumerate(paragraphs):
-            if para.strip():
-                p = Paragraph(para.replace('\n', '<br/>'), text_style)
-                story.append(p)
+        
+        # Process differently based on layout
+        if text_layout == "double":
+            # Two-column layout
+            from reportlab.platypus import FrameBreak, Frame
+            from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
+            
+            # Create a custom document template with two columns
+            class TwoColumnDocTemplate(BaseDocTemplate):
+                def __init__(self, filename, **kwargs):
+                    BaseDocTemplate.__init__(self, filename, **kwargs)
+                    
+                    # Define page width and height
+                    page_width, page_height = page_size
+                    
+                    # Calculate column width (this is approximately A5 width)
+                    column_width = (page_width - (margins['left'] + margins['right']) * inch - 20) / 2
+                    column_height = page_height - (margins['top'] + margins['bottom']) * inch
+                    
+                    # Define the frames (columns)
+                    frame1 = Frame(
+                        margins['left'] * inch, 
+                        margins['bottom'] * inch, 
+                        column_width, 
+                        column_height, 
+                        leftPadding=3, 
+                        rightPadding=3, 
+                        bottomPadding=3, 
+                        topPadding=3
+                    )
+                    
+                    frame2 = Frame(
+                        margins['left'] * inch + column_width + 20, 
+                        margins['bottom'] * inch, 
+                        column_width, 
+                        column_height, 
+                        leftPadding=3, 
+                        rightPadding=3, 
+                        bottomPadding=3, 
+                        topPadding=3
+                    )
+                    
+                    # Create the page template
+                    template = PageTemplate(
+                        'two_columns', 
+                        [frame1, frame2], 
+                        onPage=self.add_page_number
+                    )
+                    
+                    self.addPageTemplates(template)
                 
-                # Add space between paragraphs
-                if i < len(paragraphs) - 1:
-                    story.append(Spacer(1, font_size * 0.5))
+                def add_page_number(self, canvas, doc):
+                    # Optional: Add page number at the bottom
+                    page_num = canvas.getPageNumber()
+                    canvas.drawCentredString(
+                        page_size[0] / 2, 
+                        margins['bottom'] * inch / 3,
+                        str(page_num)
+                    )
+            
+            # Create the document with two columns
+            doc = TwoColumnDocTemplate(
+                output_file,
+                pagesize=page_size,
+                leftMargin=margins['left'] * inch,
+                rightMargin=margins['right'] * inch,
+                topMargin=margins['top'] * inch,
+                bottomMargin=margins['bottom'] * inch
+            )
+            
+            # Create the content
+            story = []
+            
+            # Add title if provided (spanning both columns)
+            if title:
+                story.append(Paragraph(title, title_style))
+                story.append(Spacer(1, font_size * 1.5))
+            
+            # Process paragraphs
+            for i, para in enumerate(paragraphs):
+                if para.strip():
+                    p = Paragraph(para.replace('\n', '<br/>'), text_style)
+                    story.append(p)
+                    
+                    # Add space between paragraphs
+                    if i < len(paragraphs) - 1:
+                        story.append(Spacer(1, font_size * 0.5))
+                    
+                    # Every few paragraphs, add a frame break to balance columns
+                    # Adjust this logic based on testing
+                    if (i + 1) % 3 == 0 and i < len(paragraphs) - 1:
+                        story.append(FrameBreak())
+            
+        else:
+            # Single column layout (original implementation)
+            story = []
+            
+            # Add title if provided
+            if title:
+                story.append(Paragraph(title, title_style))
+                story.append(Spacer(1, font_size * 0.5))
+            
+            # Process paragraphs
+            for i, para in enumerate(paragraphs):
+                if para.strip():
+                    p = Paragraph(para.replace('\n', '<br/>'), text_style)
+                    story.append(p)
+                    
+                    # Add space between paragraphs
+                    if i < len(paragraphs) - 1:
+                        story.append(Spacer(1, font_size * 0.5))
         
         # Build the document
         doc.build(story)

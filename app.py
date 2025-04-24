@@ -67,6 +67,7 @@ def process_text():
         text_content = request.json.get('text')
         title = request.json.get('title', '')
         text_style = request.json.get('text_style', 'normal')
+        text_layout = request.json.get('text_layout', 'single')  # 'single' ou 'double'
         font_size = int(request.json.get('font_size', 12))
         processing_type = request.json.get('processing_type', 'resize')  # Ignored for text, but kept for API consistency
         margins = {
@@ -92,6 +93,7 @@ def process_text():
             title=title,
             font_size=font_size,
             text_style=text_style,
+            text_layout=text_layout,
             margins=margins,
             orientation=orientation
         )

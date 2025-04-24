@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         content: null,
         title: null,
         style: 'normal',
+        layout: 'single',
         fontSize: 12
     };
     
@@ -112,6 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentText.content = text;
         currentText.title = textTitle.value.trim();
         currentText.style = document.querySelector('input[name="text-style"]:checked').value;
+        currentText.layout = document.querySelector('input[name="text-layout"]:checked').value;
         currentText.fontSize = parseInt(fontSizeInput.value);
         inputType = 'text';
         
@@ -180,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 text: currentText.content,
                 title: currentText.title,
                 text_style: currentText.style,
+                text_layout: currentText.layout,
                 font_size: currentText.fontSize,
                 processing_type: processingType,
                 margin_top: marginTop,
