@@ -6,27 +6,85 @@
         <div class="card mb-4">
             <div class="card-header">
                 <h2 class="card-title h5 mb-0">
-                    <i class="fas fa-file-upload me-2"></i>Enviar Documento
+                    <i class="fas fa-file-upload me-2"></i>Enviar Documento ou Texto
                 </h2>
             </div>
             <div class="card-body">
-                <form id="upload-form" enctype="multipart/form-data">
-                    <div class="upload-area">
-                        <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-secondary"></i>
-                        <h3 class="h5">Arraste seu arquivo aqui ou clique para navegar</h3>
-                        <p class="text-muted">Suporta arquivos PDF, DOC e DOCX</p>
-                        <div class="mb-3">
-                            <input type="file" class="form-control" id="document-input" name="document" accept=".pdf,.doc,.docx">
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-upload me-2"></i>Enviar
+                <!-- Abas para escolher entre upload de arquivo ou inserir texto -->
+                <ul class="nav nav-tabs mb-3" id="input-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-content" type="button" role="tab" aria-controls="file-content" aria-selected="true">
+                            <i class="fas fa-file me-2"></i>Arquivo
                         </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-content" type="button" role="tab" aria-controls="text-content" aria-selected="false">
+                            <i class="fas fa-font me-2"></i>Texto
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Conteúdo das abas -->
+                <div class="tab-content" id="input-content">
+                    <!-- Formulário de upload de arquivo -->
+                    <div class="tab-pane fade show active" id="file-content" role="tabpanel" aria-labelledby="file-tab">
+                        <form id="upload-form" enctype="multipart/form-data">
+                            <div class="upload-area">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-secondary"></i>
+                                <h3 class="h5">Arraste seu arquivo aqui ou clique para navegar</h3>
+                                <p class="text-muted">Suporta arquivos PDF, DOC e DOCX</p>
+                                <div class="mb-3">
+                                    <input type="file" class="form-control" id="document-input" name="document" accept=".pdf,.doc,.docx">
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload me-2"></i>Enviar
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                    
+                    <!-- Formulário de entrada de texto -->
+                    <div class="tab-pane fade" id="text-content" role="tabpanel" aria-labelledby="text-tab">
+                        <form id="text-form">
+                            <div class="mb-3">
+                                <label for="text-title" class="form-label">Título (opcional)</label>
+                                <input type="text" class="form-control" id="text-title" placeholder="Título do documento">
+                            </div>
+                            <div class="mb-3">
+                                <label for="text-input" class="form-label">Conteúdo do texto</label>
+                                <textarea class="form-control" id="text-input" rows="10" placeholder="Digite ou cole seu texto aqui"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Estilo do texto</label>
+                                <div class="d-flex gap-3 flex-wrap">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="text-style" id="style-normal" value="normal" checked>
+                                        <label class="form-check-label" for="style-normal">Normal</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="text-style" id="style-justified" value="justified">
+                                        <label class="form-check-label" for="style-justified">Justificado</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="text-style" id="style-centered" value="centered">
+                                        <label class="form-check-label" for="style-centered">Centralizado</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="font-size" class="form-label">Tamanho da fonte: <span id="font-size-value">12</span>pt</label>
+                                <input type="range" class="form-range" min="8" max="18" step="1" value="12" id="font-size">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>Usar este texto
+                            </button>
+                        </form>
+                    </div>
+                </div>
                 
                 <!-- Progresso de Envio -->
                 <div id="upload-progress" class="progress-container d-none">
-                    <p class="text-center">Enviando seu documento...</p>
+                    <p class="text-center">Processando...</p>
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
                     </div>

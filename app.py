@@ -60,13 +60,63 @@ def upload_file():
     flash('File type not supported. Please upload PDF, DOC, or DOCX files.', 'danger')
     return redirect(url_for('index'))
 
+@app.route('/process-text', methods=['POST'])
+def process_text():
+    try:
+        # Get parameters from request
+        text_content = request.json.get('text')
+        title = request.json.get('title', '')
+        text_style = request.json.get('text_style', 'normal')
+        font_size = int(request.json.get('font_size', 12))
+        processing_type = request.json.get('processing_type', 'resize')  # Ignored for text, but kept for API consistency
+        margins = {
+            'top': float(request.json.get('margin_top', 0.5)),
+            'right': float(request.json.get('margin_right', 0.5)),
+            'bottom': float(request.json.get('margin_bottom', 0.5)),
+            'left': float(request.json.get('margin_left', 0.5))
+        }
+        orientation = request.json.get('orientation', 'portrait')
+        
+        # Validate inputs
+        if not text_content:
+            return jsonify({'success': False, 'error': 'Texto não fornecido'})
+        
+        # Generate output filename
+        output_filename = os.path.join(PROCESSED_FOLDER, 
+                                      f"{uuid.uuid4()}_text_document.pdf")
+        
+        # Create PDF from text
+        success = dp.create_pdf_from_text(
+            text_content, 
+            output_filename, 
+            title=title,
+            font_size=font_size,
+            text_style=text_style,
+            margins=margins,
+            orientation=orientation
+        )
+        
+        if success:
+            # Return preview URL
+            return jsonify({
+                'success': True,
+                'output_path': output_filename,
+                'preview_url': url_for('get_preview', filename=os.path.basename(output_filename))
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Falha ao processar o texto'})
+            
+    except Exception as e:
+        logging.error(f"Error processing text: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/process', methods=['POST'])
 def process_document():
     try:
         # Get parameters from request
         file_path = request.json.get('file_path')
         file_type = request.json.get('file_type')
-        processing_type = request.json.get('processing_type')  # 'resize' or 'split'
+        processing_type = request.json.get('processing_type', 'resize')  # 'resize' or 'split'
         margins = {
             'top': float(request.json.get('margin_top', 0.5)),
             'right': float(request.json.get('margin_right', 0.5)),
@@ -77,7 +127,7 @@ def process_document():
         
         # Validate inputs
         if not file_path or not os.path.exists(file_path):
-            return jsonify({'success': False, 'error': 'File not found'})
+            return jsonify({'success': False, 'error': 'Arquivo não encontrado'})
         
         # Generate output filename
         output_filename = os.path.join(PROCESSED_FOLDER, 
@@ -95,7 +145,7 @@ def process_document():
             conversion_success = dp.convert_word_to_pdf(file_path, temp_pdf)
             
             if not conversion_success:
-                return jsonify({'success': False, 'error': 'Failed to convert Word document to PDF'})
+                return jsonify({'success': False, 'error': 'Falha ao converter documento Word para PDF'})
             
             # Then process the PDF
             if processing_type == 'resize':
@@ -115,7 +165,7 @@ def process_document():
                 'preview_url': url_for('get_preview', filename=os.path.basename(output_filename))
             })
         else:
-            return jsonify({'success': False, 'error': 'Document processing failed'})
+            return jsonify({'success': False, 'error': 'Falha ao processar o documento'})
             
     except Exception as e:
         logging.error(f"Error processing document: {str(e)}")

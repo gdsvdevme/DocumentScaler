@@ -1,8 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Elementos DOM
     const uploadForm = document.getElementById('upload-form');
+    const textForm = document.getElementById('text-form');
     const processingForm = document.getElementById('processing-form');
     const fileInput = document.getElementById('document-input');
+    const textInput = document.getElementById('text-input');
+    const textTitle = document.getElementById('text-title');
+    const fontSizeInput = document.getElementById('font-size');
+    const fontSizeValue = document.getElementById('font-size-value');
     const fileNameDisplay = document.getElementById('file-name');
     const processingOptions = document.getElementById('processing-options');
     const uploadProgress = document.getElementById('upload-progress');
@@ -12,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const orientationSwitch = document.getElementById('orientation-switch');
     const orientationLabel = document.getElementById('orientation-label');
     
-    // Armazenar informações do arquivo
+    // Armazenar informações do arquivo ou texto
     let currentFile = {
         path: null,
         name: null,
@@ -20,9 +25,23 @@ document.addEventListener('DOMContentLoaded', function() {
         type: null
     };
     
+    let currentText = {
+        content: null,
+        title: null,
+        style: 'normal',
+        fontSize: 12
+    };
+    
+    let inputType = 'file'; // 'file' ou 'text'
+    
     let currentOutput = {
         path: null
     };
+    
+    // Atualizar o valor exibido do tamanho da fonte
+    fontSizeInput.addEventListener('input', function() {
+        fontSizeValue.textContent = this.value;
+    });
     
     // Envio do formulário de upload
     uploadForm.addEventListener('submit', function(e) {
@@ -63,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentFile.name = data.file_name;
                 currentFile.id = data.file_id;
                 currentFile.type = data.file_type;
+                inputType = 'file';
                 
                 // Atualizar UI
                 fileNameDisplay.textContent = data.file_name;
@@ -78,12 +98,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Envio do formulário de texto
+    textForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const text = textInput.value.trim();
+        if (!text) {
+            showAlert('Por favor, insira algum texto', 'danger');
+            return;
+        }
+        
+        // Armazenar informações do texto
+        currentText.content = text;
+        currentText.title = textTitle.value.trim();
+        currentText.style = document.querySelector('input[name="text-style"]:checked').value;
+        currentText.fontSize = parseInt(fontSizeInput.value);
+        inputType = 'text';
+        
+        // Atualizar UI
+        const displayName = currentText.title || 'Documento de texto';
+        fileNameDisplay.textContent = displayName;
+        processingOptions.classList.remove('d-none');
+        showAlert('Texto preparado com sucesso!', 'success');
+    });
+    
     // Envio do formulário de processamento
     processingForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        if (!currentFile.path) {
+        // Verificar se temos um arquivo ou texto para processar
+        if (inputType === 'file' && !currentFile.path) {
             showAlert('Por favor, envie um arquivo primeiro', 'warning');
+            return;
+        } else if (inputType === 'text' && !currentText.content) {
+            showAlert('Por favor, insira algum texto primeiro', 'warning');
             return;
         }
         
@@ -98,52 +146,87 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mostrar progresso de processamento
         processingProgress.classList.remove('d-none');
         
-        // Criar dados da requisição
-        const requestData = {
-            file_path: currentFile.path,
-            file_type: currentFile.type,
-            processing_type: processingType,
-            margin_top: marginTop,
-            margin_right: marginRight,
-            margin_bottom: marginBottom,
-            margin_left: marginLeft,
-            orientation: orientation
-        };
-        
-        // Enviar requisição de processamento
-        fetch('/process', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            processingProgress.classList.add('d-none');
+        // Processar de acordo com o tipo de entrada (arquivo ou texto)
+        if (inputType === 'file') {
+            // Criar dados da requisição para arquivo
+            const requestData = {
+                file_path: currentFile.path,
+                file_type: currentFile.type,
+                processing_type: processingType,
+                margin_top: marginTop,
+                margin_right: marginRight,
+                margin_bottom: marginBottom,
+                margin_left: marginLeft,
+                orientation: orientation
+            };
             
-            if (data.success) {
-                // Armazenar caminho do arquivo de saída
-                currentOutput.path = data.output_path;
-                
-                // Atualizar pré-visualização
-                previewContainer.classList.remove('d-none');
-                initPdfPreview(data.preview_url);
-                
-                // Habilitar botão de download
-                downloadBtn.classList.remove('d-none');
-                downloadBtn.href = `/download/${data.preview_url.split('/').pop()}`;
-                
-                showAlert('Documento processado com sucesso!', 'success');
-            } else {
-                showAlert('Erro: ' + data.error, 'danger');
-            }
-        })
-        .catch(error => {
-            processingProgress.classList.add('d-none');
-            showAlert('Erro ao processar documento: ' + error.message, 'danger');
-        });
+            // Enviar requisição de processamento de arquivo
+            fetch('/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => handleProcessingResponse(data))
+            .catch(error => {
+                processingProgress.classList.add('d-none');
+                showAlert('Erro ao processar documento: ' + error.message, 'danger');
+            });
+        } else {
+            // Criar dados da requisição para texto
+            const requestData = {
+                text: currentText.content,
+                title: currentText.title,
+                text_style: currentText.style,
+                font_size: currentText.fontSize,
+                processing_type: processingType,
+                margin_top: marginTop,
+                margin_right: marginRight,
+                margin_bottom: marginBottom,
+                margin_left: marginLeft,
+                orientation: orientation
+            };
+            
+            // Enviar requisição de processamento de texto
+            fetch('/process-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => handleProcessingResponse(data))
+            .catch(error => {
+                processingProgress.classList.add('d-none');
+                showAlert('Erro ao processar texto: ' + error.message, 'danger');
+            });
+        }
     });
+    
+    // Função para tratar a resposta do processamento
+    function handleProcessingResponse(data) {
+        processingProgress.classList.add('d-none');
+        
+        if (data.success) {
+            // Armazenar caminho do arquivo de saída
+            currentOutput.path = data.output_path;
+            
+            // Atualizar pré-visualização
+            previewContainer.classList.remove('d-none');
+            initPdfPreview(data.preview_url);
+            
+            // Habilitar botão de download
+            downloadBtn.classList.remove('d-none');
+            downloadBtn.href = `/download/${data.preview_url.split('/').pop()}`;
+            
+            showAlert('Documento processado com sucesso!', 'success');
+        } else {
+            showAlert('Erro: ' + data.error, 'danger');
+        }
+    }
     
     // Atualizar rótulo de orientação quando o switch mudar
     orientationSwitch.addEventListener('change', function() {

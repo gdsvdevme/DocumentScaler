@@ -21,6 +21,30 @@ body {
     background-color: rgba(var(--bs-primary-rgb), 0.05);
 }
 
+/* Text input styles */
+textarea.form-control {
+    min-height: 200px;
+    resize: vertical;
+    line-height: 1.5;
+    font-size: 1rem;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    color: var(--bs-secondary);
+    padding: 0.75rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--bs-primary);
+    font-weight: 500;
+}
+
+.tab-content {
+    padding-top: 1.5rem;
+}
+
 /* Document preview */
 .preview-pages {
     display: flex;
@@ -41,6 +65,15 @@ body {
     max-width: 100%;
     height: auto;
     display: block;
+}
+
+.pdf-preview {
+    overflow: auto;
+    max-height: 800px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    background-color: var(--bs-secondary-bg);
+    padding: 1rem;
 }
 
 .page-number {
@@ -74,9 +107,30 @@ body {
     margin: 1.5rem 0;
 }
 
+/* Range input styling */
+.form-range::-webkit-slider-thumb {
+    background-color: var(--bs-primary);
+}
+
+.form-range::-moz-range-thumb {
+    background-color: var(--bs-primary);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .margins-container {
         grid-template-columns: 1fr;
+    }
+    
+    .upload-area {
+        padding: 1.5rem;
+    }
+    
+    .tab-content {
+        padding-top: 1rem;
+    }
+    
+    textarea.form-control {
+        min-height: 150px;
     }
 }

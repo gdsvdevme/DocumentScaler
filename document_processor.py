@@ -4,6 +4,10 @@ import tempfile
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4, A5
 from reportlab.pdfgen import canvas
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_LEFT
+from reportlab.lib.units import inch
 import subprocess
 from pdf2image import convert_from_path
 from docx2pdf import convert
@@ -133,6 +137,85 @@ def resize_pdf_to_a5(input_file, output_file, margins, orientation='portrait'):
         return True
     except Exception as e:
         logging.error(f"Error resizing PDF: {str(e)}")
+        return False
+
+def create_pdf_from_text(text, output_file, title="", font_size=12, text_style="normal", margins=None, orientation='portrait'):
+    """
+    Create a PDF document from plain text
+    """
+    try:
+        # Set default margins if not provided
+        if margins is None:
+            margins = {'top': 0.5, 'right': 0.5, 'bottom': 0.5, 'left': 0.5}
+        
+        # Determine page size based on orientation
+        if orientation == 'portrait':
+            page_size = A5
+        else:  # landscape
+            page_size = (A5_HEIGHT, A5_WIDTH)  # Swap width and height
+        
+        # Create a PDF document
+        doc = SimpleDocTemplate(
+            output_file,
+            pagesize=page_size,
+            leftMargin=margins['left'] * inch,
+            rightMargin=margins['right'] * inch,
+            topMargin=margins['top'] * inch,
+            bottomMargin=margins['bottom'] * inch
+        )
+        
+        # Set styles
+        styles = getSampleStyleSheet()
+        
+        # Create a custom paragraph style based on the text style
+        if text_style == "justified":
+            alignment = TA_JUSTIFY
+        elif text_style == "centered":
+            alignment = TA_CENTER
+        else:  # normal
+            alignment = TA_LEFT
+            
+        text_style = ParagraphStyle(
+            'CustomStyle',
+            parent=styles['Normal'],
+            fontSize=font_size,
+            alignment=alignment,
+            leading=font_size * 1.2  # Line height
+        )
+        
+        # Create the content
+        story = []
+        
+        # Add title if provided
+        if title:
+            title_style = ParagraphStyle(
+                'Title',
+                parent=styles['Heading1'],
+                fontSize=font_size + 4,
+                alignment=TA_CENTER,
+                spaceAfter=font_size * 2
+            )
+            story.append(Paragraph(title, title_style))
+            story.append(Spacer(1, font_size * 0.5))
+        
+        # Split text into paragraphs and add to the story
+        paragraphs = text.split('\n\n')
+        for i, para in enumerate(paragraphs):
+            if para.strip():
+                p = Paragraph(para.replace('\n', '<br/>'), text_style)
+                story.append(p)
+                
+                # Add space between paragraphs
+                if i < len(paragraphs) - 1:
+                    story.append(Spacer(1, font_size * 0.5))
+        
+        # Build the document
+        doc.build(story)
+        
+        return True
+    
+    except Exception as e:
+        logging.error(f"Error creating PDF from text: {str(e)}")
         return False
 
 def split_pdf_to_a5(input_file, output_file, margins, orientation='portrait'):
