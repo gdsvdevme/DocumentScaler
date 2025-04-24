@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM elements
+    // Elementos DOM
     const uploadForm = document.getElementById('upload-form');
     const processingForm = document.getElementById('processing-form');
     const fileInput = document.getElementById('document-input');
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const orientationSwitch = document.getElementById('orientation-switch');
     const orientationLabel = document.getElementById('orientation-label');
     
-    // Store file info
+    // Armazenar informações do arquivo
     let currentFile = {
         path: null,
         name: null,
@@ -24,31 +24,31 @@ document.addEventListener('DOMContentLoaded', function() {
         path: null
     };
     
-    // Upload form submission
+    // Envio do formulário de upload
     uploadForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const file = fileInput.files[0];
         if (!file) {
-            showAlert('Please select a file', 'danger');
+            showAlert('Por favor, selecione um arquivo', 'danger');
             return;
         }
         
-        // Check file type
+        // Verificar tipo de arquivo
         const fileExt = file.name.split('.').pop().toLowerCase();
         if (!['pdf', 'doc', 'docx'].includes(fileExt)) {
-            showAlert('Unsupported file type. Please upload PDF, DOC, or DOCX files.', 'danger');
+            showAlert('Tipo de arquivo não suportado. Por favor, envie arquivos PDF, DOC ou DOCX.', 'danger');
             return;
         }
         
-        // Show progress
+        // Mostrar progresso
         uploadProgress.classList.remove('d-none');
         
-        // Create FormData
+        // Criar FormData
         const formData = new FormData();
         formData.append('document', file);
         
-        // Send upload request
+        // Enviar requisição de upload
         fetch('/upload', {
             method: 'POST',
             body: formData
@@ -58,36 +58,36 @@ document.addEventListener('DOMContentLoaded', function() {
             uploadProgress.classList.add('d-none');
             
             if (data.success) {
-                // Store file info
+                // Armazenar informações do arquivo
                 currentFile.path = data.file_path;
                 currentFile.name = data.file_name;
                 currentFile.id = data.file_id;
                 currentFile.type = data.file_type;
                 
-                // Update UI
+                // Atualizar UI
                 fileNameDisplay.textContent = data.file_name;
                 processingOptions.classList.remove('d-none');
-                showAlert('File uploaded successfully!', 'success');
+                showAlert('Arquivo enviado com sucesso!', 'success');
             } else {
-                showAlert('Error: ' + data.error, 'danger');
+                showAlert('Erro: ' + data.error, 'danger');
             }
         })
         .catch(error => {
             uploadProgress.classList.add('d-none');
-            showAlert('Error uploading file: ' + error.message, 'danger');
+            showAlert('Erro ao enviar arquivo: ' + error.message, 'danger');
         });
     });
     
-    // Processing form submission
+    // Envio do formulário de processamento
     processingForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         if (!currentFile.path) {
-            showAlert('Please upload a file first', 'warning');
+            showAlert('Por favor, envie um arquivo primeiro', 'warning');
             return;
         }
         
-        // Get form values
+        // Obter valores do formulário
         const processingType = document.querySelector('input[name="processing-type"]:checked').value;
         const marginTop = document.getElementById('margin-top').value;
         const marginRight = document.getElementById('margin-right').value;
@@ -95,10 +95,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const marginLeft = document.getElementById('margin-left').value;
         const orientation = document.getElementById('orientation-switch').checked ? 'landscape' : 'portrait';
         
-        // Show processing progress
+        // Mostrar progresso de processamento
         processingProgress.classList.remove('d-none');
         
-        // Create request data
+        // Criar dados da requisição
         const requestData = {
             file_path: currentFile.path,
             file_type: currentFile.type,
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
             orientation: orientation
         };
         
-        // Send processing request
+        // Enviar requisição de processamento
         fetch('/process', {
             method: 'POST',
             headers: {
@@ -123,52 +123,52 @@ document.addEventListener('DOMContentLoaded', function() {
             processingProgress.classList.add('d-none');
             
             if (data.success) {
-                // Store output path
+                // Armazenar caminho do arquivo de saída
                 currentOutput.path = data.output_path;
                 
-                // Update preview
+                // Atualizar pré-visualização
                 previewContainer.classList.remove('d-none');
                 initPdfPreview(data.preview_url);
                 
-                // Enable download button
+                // Habilitar botão de download
                 downloadBtn.classList.remove('d-none');
                 downloadBtn.href = `/download/${data.preview_url.split('/').pop()}`;
                 
-                showAlert('Document processed successfully!', 'success');
+                showAlert('Documento processado com sucesso!', 'success');
             } else {
-                showAlert('Error: ' + data.error, 'danger');
+                showAlert('Erro: ' + data.error, 'danger');
             }
         })
         .catch(error => {
             processingProgress.classList.add('d-none');
-            showAlert('Error processing document: ' + error.message, 'danger');
+            showAlert('Erro ao processar documento: ' + error.message, 'danger');
         });
     });
     
-    // Update orientation label when switch changes
+    // Atualizar rótulo de orientação quando o switch mudar
     orientationSwitch.addEventListener('change', function() {
-        orientationLabel.textContent = this.checked ? 'Landscape' : 'Portrait';
+        orientationLabel.textContent = this.checked ? 'Paisagem' : 'Retrato';
     });
     
-    // Helper function to show alerts
+    // Função auxiliar para mostrar alertas
     function showAlert(message, type) {
         const alertsContainer = document.getElementById('alerts');
         const alert = document.createElement('div');
         alert.className = `alert alert-${type} alert-dismissible fade show`;
         alert.innerHTML = `
             ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
         `;
         alertsContainer.appendChild(alert);
         
-        // Auto-dismiss after 5 seconds
+        // Auto-dispensa após 5 segundos
         setTimeout(() => {
             alert.classList.remove('show');
             setTimeout(() => alert.remove(), 150);
         }, 5000);
     }
     
-    // File input change event to update UI
+    // Evento de mudança do input de arquivo para atualizar a UI
     fileInput.addEventListener('change', function() {
         if (this.files.length > 0) {
             const fileName = this.files[0].name;

@@ -6,27 +6,27 @@
         <div class="card mb-4">
             <div class="card-header">
                 <h2 class="card-title h5 mb-0">
-                    <i class="fas fa-file-upload me-2"></i>Upload Document
+                    <i class="fas fa-file-upload me-2"></i>Enviar Documento
                 </h2>
             </div>
             <div class="card-body">
                 <form id="upload-form" enctype="multipart/form-data">
                     <div class="upload-area">
                         <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-secondary"></i>
-                        <h3 class="h5">Drop your file here or click to browse</h3>
-                        <p class="text-muted">Supports PDF, DOC, and DOCX files</p>
+                        <h3 class="h5">Arraste seu arquivo aqui ou clique para navegar</h3>
+                        <p class="text-muted">Suporta arquivos PDF, DOC e DOCX</p>
                         <div class="mb-3">
                             <input type="file" class="form-control" id="document-input" name="document" accept=".pdf,.doc,.docx">
                         </div>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-upload me-2"></i>Upload
+                            <i class="fas fa-upload me-2"></i>Enviar
                         </button>
                     </div>
                 </form>
                 
-                <!-- Upload Progress -->
+                <!-- Progresso de Envio -->
                 <div id="upload-progress" class="progress-container d-none">
-                    <p class="text-center">Uploading your document...</p>
+                    <p class="text-center">Enviando seu documento...</p>
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
                     </div>
@@ -34,68 +34,68 @@
             </div>
         </div>
         
-        <!-- Processing Options (Hidden until file is uploaded) -->
+        <!-- Opções de Processamento (Oculto até que o arquivo seja enviado) -->
         <div id="processing-options" class="card mb-4 d-none">
             <div class="card-header">
                 <h2 class="card-title h5 mb-0">
-                    <i class="fas fa-cog me-2"></i>Configure Print Settings
+                    <i class="fas fa-cog me-2"></i>Configurar Opções de Impressão
                 </h2>
             </div>
             <div class="card-body">
                 <p>
-                    <strong>Current document:</strong> 
-                    <span id="file-name" class="text-info">No file selected</span>
+                    <strong>Documento atual:</strong> 
+                    <span id="file-name" class="text-info">Nenhum arquivo selecionado</span>
                 </p>
                 
                 <form id="processing-form">
                     <div class="mb-4">
-                        <label class="form-label">Processing Method:</label>
+                        <label class="form-label">Método de Processamento:</label>
                         <div class="d-flex flex-wrap gap-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="processing-type" id="resize-option" value="resize" checked>
                                 <label class="form-check-label" for="resize-option">
-                                    <i class="fas fa-compress-alt me-2"></i>Resize to A5
-                                    <small class="d-block text-muted">Shrink the entire document to A5 size</small>
+                                    <i class="fas fa-compress-alt me-2"></i>Redimensionar para A5
+                                    <small class="d-block text-muted">Reduzir o documento inteiro para tamanho A5</small>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="processing-type" id="split-option" value="split">
                                 <label class="form-check-label" for="split-option">
-                                    <i class="fas fa-columns me-2"></i>Split A4 to two A5 pages
-                                    <small class="d-block text-muted">Split each A4 page into two A5 pages</small>
+                                    <i class="fas fa-columns me-2"></i>Dividir A4 em duas páginas A5
+                                    <small class="d-block text-muted">Dividir cada página A4 em duas páginas A5</small>
                                 </label>
                             </div>
                         </div>
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label">Orientation:</label>
+                        <label class="form-label">Orientação:</label>
                         <div class="orientation-switch-container">
-                            <span>Portrait</span>
+                            <span>Retrato</span>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="orientation-switch">
                             </div>
-                            <span id="orientation-label">Portrait</span>
+                            <span id="orientation-label">Retrato</span>
                         </div>
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label">Margins (inches):</label>
+                        <label class="form-label">Margens (polegadas):</label>
                         <div class="margins-container">
                             <div class="mb-2">
-                                <label for="margin-top" class="form-label">Top</label>
+                                <label for="margin-top" class="form-label">Superior</label>
                                 <input type="number" class="form-control" id="margin-top" value="0.5" min="0" max="3" step="0.1">
                             </div>
                             <div class="mb-2">
-                                <label for="margin-right" class="form-label">Right</label>
+                                <label for="margin-right" class="form-label">Direita</label>
                                 <input type="number" class="form-control" id="margin-right" value="0.5" min="0" max="3" step="0.1">
                             </div>
                             <div class="mb-2">
-                                <label for="margin-bottom" class="form-label">Bottom</label>
+                                <label for="margin-bottom" class="form-label">Inferior</label>
                                 <input type="number" class="form-control" id="margin-bottom" value="0.5" min="0" max="3" step="0.1">
                             </div>
                             <div class="mb-2">
-                                <label for="margin-left" class="form-label">Left</label>
+                                <label for="margin-left" class="form-label">Esquerda</label>
                                 <input type="number" class="form-control" id="margin-left" value="0.5" min="0" max="3" step="0.1">
                             </div>
                         </div>
@@ -103,14 +103,14 @@
                     
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-magic me-2"></i>Process Document
+                            <i class="fas fa-magic me-2"></i>Processar Documento
                         </button>
                     </div>
                 </form>
                 
-                <!-- Processing Progress -->
+                <!-- Progresso de Processamento -->
                 <div id="processing-progress" class="progress-container d-none">
-                    <p class="text-center">Processing your document...</p>
+                    <p class="text-center">Processando seu documento...</p>
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
                     </div>
@@ -118,11 +118,11 @@
             </div>
         </div>
         
-        <!-- Preview Container (Hidden until document is processed) -->
+        <!-- Container de Pré-visualização (Oculto até que o documento seja processado) -->
         <div id="preview-container" class="card mb-4 d-none">
             <div class="card-header">
                 <h2 class="card-title h5 mb-0">
-                    <i class="fas fa-eye me-2"></i>Document Preview
+                    <i class="fas fa-eye me-2"></i>Pré-visualização do Documento
                 </h2>
             </div>
             <div class="card-body">
@@ -130,7 +130,7 @@
                 
                 <div class="text-center mt-4">
                     <a id="download-btn" href="#" class="btn btn-success d-none">
-                        <i class="fas fa-download me-2"></i>Download Processed Document
+                        <i class="fas fa-download me-2"></i>Baixar Documento Processado
                     </a>
                 </div>
             </div>

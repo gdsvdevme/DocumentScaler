@@ -1,10 +1,10 @@
-// PDF Preview functionality using PDF.js
+// Funcionalidade de pré-visualização de PDF usando PDF.js
 function initPdfPreview(pdfUrl) {
-    // Get the container element
+    // Obter o elemento container
     const container = document.getElementById('pdf-preview');
     container.innerHTML = '';
     
-    // Load the PDF.js viewer dynamically
+    // Carregar o visualizador PDF.js dinamicamente
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js';
     script.onload = function() {
@@ -17,74 +17,74 @@ function initPdfPreview(pdfUrl) {
 }
 
 function loadPdf(pdfUrl, pdfjsLib, container) {
-    // Load the PDF document
+    // Carregar o documento PDF
     const loadingTask = pdfjsLib.getDocument(pdfUrl);
     
     loadingTask.promise.then(function(pdf) {
-        // Create a preview for the first 5 pages (or fewer if the document has fewer pages)
+        // Criar uma pré-visualização para as primeiras 5 páginas (ou menos se o documento tiver menos páginas)
         const numPages = Math.min(pdf.numPages, 5);
         
-        // Add page count indicator
+        // Adicionar indicador de contagem de páginas
         const pageCount = document.createElement('div');
         pageCount.className = 'text-center text-muted mb-2';
-        pageCount.textContent = `Document has ${pdf.numPages} page(s)`;
+        pageCount.textContent = `O documento tem ${pdf.numPages} página(s)`;
         container.appendChild(pageCount);
         
-        // Create preview container
+        // Criar container de pré-visualização
         const previewPages = document.createElement('div');
         previewPages.className = 'preview-pages';
         container.appendChild(previewPages);
         
-        // Load each page
+        // Carregar cada página
         for (let i = 1; i <= numPages; i++) {
             renderPage(pdf, i, previewPages);
         }
         
-        // Add note if showing only a preview
+        // Adicionar nota se estiver mostrando apenas uma pré-visualização
         if (pdf.numPages > 5) {
             const previewNote = document.createElement('div');
             previewNote.className = 'text-center text-muted mt-3';
-            previewNote.textContent = 'Showing first 5 pages as preview. Download the file to see all pages.';
+            previewNote.textContent = 'Mostrando as primeiras 5 páginas como pré-visualização. Baixe o arquivo para ver todas as páginas.';
             container.appendChild(previewNote);
         }
     }).catch(function(error) {
-        console.error('Error loading PDF:', error);
+        console.error('Erro ao carregar PDF:', error);
         
-        // Show error message
+        // Mostrar mensagem de erro
         const errorMsg = document.createElement('div');
         errorMsg.className = 'alert alert-danger';
-        errorMsg.textContent = 'Error loading PDF preview. Please try again or download the file.';
+        errorMsg.textContent = 'Erro ao carregar a pré-visualização do PDF. Por favor, tente novamente ou baixe o arquivo.';
         container.appendChild(errorMsg);
     });
 }
 
 function renderPage(pdf, pageNumber, container) {
-    // Get the page
+    // Obter a página
     pdf.getPage(pageNumber).then(function(page) {
-        // Create a wrapper for this page
+        // Criar um wrapper para esta página
         const pageWrapper = document.createElement('div');
         pageWrapper.className = 'pdf-page-wrapper mb-4';
         
-        // Create page number indicator
+        // Criar indicador de número de página
         const pageNum = document.createElement('div');
         pageNum.className = 'page-number badge bg-secondary';
-        pageNum.textContent = `Page ${pageNumber}`;
+        pageNum.textContent = `Página ${pageNumber}`;
         pageWrapper.appendChild(pageNum);
         
-        // Create canvas for the page
+        // Criar canvas para a página
         const canvas = document.createElement('canvas');
         pageWrapper.appendChild(canvas);
         container.appendChild(pageWrapper);
         
-        // Get the context
+        // Obter o contexto
         const context = canvas.getContext('2d');
         
-        // Set scale
+        // Definir escala
         const viewport = page.getViewport({ scale: 0.8 });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
         
-        // Render the page
+        // Renderizar a página
         const renderContext = {
             canvasContext: context,
             viewport: viewport

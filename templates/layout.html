@@ -1,36 +1,36 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="pt-BR" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A5 Print Formatter</title>
-    <!-- Bootstrap CSS (Replit Theme) -->
+    <title>Formatador de Impressão A5</title>
+    <!-- Bootstrap CSS (Tema Replit) -->
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
-    <!-- Custom CSS -->
+    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Font Awesome Icons -->
+    <!-- Ícones Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header class="text-center my-4">
-            <h1 class="mb-2">A5 Print Formatter</h1>
-            <p class="lead text-secondary">Convert and format documents for A5 printing on A4 printers</p>
+            <h1 class="mb-2">Formatador de Impressão A5</h1>
+            <p class="lead text-secondary">Converta e formate documentos para impressão em A5 usando impressoras A4</p>
         </header>
         
-        <!-- Alert container for notifications -->
+        <!-- Container de alertas para notificações -->
         <div id="alerts"></div>
         
         {% block content %}{% endblock %}
         
         <footer class="mt-5 pt-3 text-center text-muted border-top">
-            <p>A5 Print Formatter &copy; 2023</p>
+            <p>Formatador de Impressão A5 &copy; 2023</p>
         </footer>
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
+    <!-- Bootstrap Bundle com Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JavaScript -->
+    <!-- JavaScript Personalizado -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/pdf_preview.js') }}"></script>
     {% block scripts %}{% endblock %}
